@@ -78,7 +78,7 @@ class CacheClass(BaseCache):
     def get_many(self, keys):
         "Retrieve many keys."
         many = self._cache.mget(keys)
-        return [{k:pickle.loads(v)} for k,v in many]
+        return dict([( k, pickle.loads(v)) for k,v in many])
 
     @__retry_with_reset_on_error__
     def flush(self, all_dbs=False):
