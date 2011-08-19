@@ -14,7 +14,10 @@ def __retry_with_reset_on_error__(func):
     def wrapped(self, *args, **kwargs):
         try:
             return func(self, *args, **kwargs)
-        except socket.error, e:
+        except socket.error, e: #Both these errors can be raised on various errors
+            self.reset_cache_connection()
+            return func(self, *args, **kwargs)
+        except pytyrant.TyrantError, e:
             self.reset_cache_connection()
             return func(self, *args, **kwargs)
     return wrapped
