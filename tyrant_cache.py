@@ -24,22 +24,27 @@ def __retry_with_reset_on_error__(func):
 
 
 class CacheClass(BaseCache):
-    def __init__(self, server, params):
+    def __init__(self, server, params, timeout=0.5):
         "Connect to Tokyo Tyrant, and set up cache backend."
         BaseCache.__init__(self, params)
         host, port = server.split(':')
         self.host = host
-        self.port = port
-        self._cache = pytyrant.Tyrant.open(self.host, int(self.port))
+        self.port = int(port)
+        self.timeout = timeout
+        self.reset_cache_connection()
 
     def reset_cache_connection(self):
-        self._cache = pytyrant.Tyrant.open(self.host, int(self.port))
+        sock = socket.socket()
+        sock.connect((self.host, self.port))
+        sock.settimeout(self.timeout)
+        sock.setsockopt(socket.SOL_TCP, socket.TCP_NODELAY, 1)
+        self._cache = pytyrant.Tyrant(sock)
 
     def _prepare_key(self, raw_key):
         return smart_str(raw_key)
 
     @__retry_with_reset_on_error__
-    def add(self, key, value, timeout=0):
+    def add(self, key, value):
         "Add a value to the cache. Returns ``True`` if the object was added, ``False`` if not."
         try:
             value = pickle.dumps(value)
