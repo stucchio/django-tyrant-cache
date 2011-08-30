@@ -89,6 +89,15 @@ class CacheClass(BaseCache):
         return dict([( k, pickle.loads(v)) for k,v in many])
 
     @__retry_with_reset_on_error__
+    def set_many(self, d):
+        "Set many keys."
+        #Because I can't figure out how to implement an efficient set_many, I implement an inefficient one
+        #The main goal here is not to break code which demands this.
+        for k in d.keys():
+            self.set(k, d[k])
+        return True
+
+    @__retry_with_reset_on_error__
     def flush(self, all_dbs=False):
         self._cache.vanish()
 
