@@ -17,6 +17,9 @@ def __retry_with_reset_on_error__(func):
         except socket.error, e: #Both these errors can be raised on various errors
             self.reset_cache_connection()
             return func(self, *args, **kwargs)
+        except EOFError, e: #Both these errors can be raised on various errors
+            self.reset_cache_connection()
+            return func(self, *args, **kwargs)
         except pytyrant.TyrantError, e:
             self.reset_cache_connection()
             return func(self, *args, **kwargs)
